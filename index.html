@@ -113,6 +113,7 @@ font-size:14px;font-weight:700;cursor:pointer}
       <option value="частная">Частная клиника</option>
       <option value="смешанная">Смешанный</option>
     </select>
+    <select id="spec"><option value="">Все специальности</option></select>
     <select id="exp">
       <option value="">Любой стаж</option>
       <option value="5">До 5 лет</option>
@@ -215,6 +216,7 @@ function card(d){
 function render(){
   const q=document.getElementById('q').value.toLowerCase().trim();
   const sec=document.getElementById('sector').value;
+  const sp=document.getElementById('spec').value.toLowerCase();
   const ex=document.getElementById('exp').value;
   const onlyrise=document.getElementById('onlyrise').checked;
   let list=DOCTORS.slice();
@@ -223,6 +225,7 @@ function render(){
   if(tab==='top') list=list.filter(d=>d.is_top);
   if(q) list=list.filter(d=>d.name.toLowerCase().includes(q));
   if(sec) list=list.filter(d=>d.sector===sec);
+  if(sp) list=list.filter(d=>d.spec.toLowerCase().includes(sp));
   if(ex){const e=+ex;list=list.filter(d=>d.exp!=null&&(e===99?d.exp>20:(e===20?(d.exp>10&&d.exp<=20):d.exp<=e)));}
   if(onlyrise) list=list.filter(d=>d.rising);
   if(tab==='top') list.sort((a,b)=>b.quality-a.quality);
@@ -237,7 +240,11 @@ function init(){
   statHtml();
   document.getElementById('trendnote').innerHTML = META.trendNote;
   tabsHtml();
-  ['q','sector','exp','onlyrise'].forEach(id=>{
+  const specs=[...new Set(DOCTORS.flatMap(d=>d.spec.split(',').map(s=>s.trim()).filter(Boolean)))]
+    .sort((a,b)=>a.localeCompare(b,'ru'));
+  document.getElementById('spec').innerHTML='<option value="">Все специальности</option>'
+    +specs.map(s=>`<option value="${s}">${s[0].toUpperCase()+s.slice(1)}</option>`).join('');
+  ['q','sector','spec','exp','onlyrise'].forEach(id=>{
     const el=document.getElementById(id);
     el.addEventListener(id==='q'?'input':'change',render);
   });
